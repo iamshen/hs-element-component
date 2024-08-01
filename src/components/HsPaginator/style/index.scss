@@ -1,0 +1,9 @@
+.pagination-container {
+  background: #fff;
+  padding: 32px 16px;
+  display: flex;
+}
+
+.pagination-container.hidden {
+  display: none;
+}
