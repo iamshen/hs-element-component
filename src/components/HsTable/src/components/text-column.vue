@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import type { PropType } from 'vue'
 import { computed } from 'vue'
+import { type TextProps, textProps } from 'element-plus'
+import { ElCol, ElText } from 'element-plus'
 import type { TableColumnProps } from '../types'
+import { getDefaultProps } from './utils'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'TEXT'>>,
     required: true,
     default: () => {},
   },
@@ -19,53 +22,38 @@ const props = defineProps({
 const customClass = computed(() => {
   const strClass: string[] = ['el-table-text-column']
   if (props.column.cellClass) {
-    strClass.push(props.column.cellClass(props.row[props.column.Name], props.row))
+    strClass.push(props.column.cellClass(props.row[props.column.name], props.row))
   }
   return strClass.join(' ')
 })
 
 const cellText = computed(() => {
-  const res = props.row[props.column.Name]
+  const res = props.row[props.column.name]
 
-  if (props.column.Name === '') {
+  if (props.column.name === '') {
     return ''
   }
   if (res === null || res === undefined || res === '') {
     return '--'
   }
-  return props.row[props.column.Name]
+  return props.row[props.column.name]
 })
 
-const textType = computed(() => {
-  if (props.column.formatter) {
-    const textOption: any = props.column.formatter(props.row[props.column.Name], props.row)
-    return textOption?.type || ''
-  }
-  return ''
-})
-
-const textTag = computed(() => {
-  if (props.column.formatter) {
-    const textOption: any = props.column.formatter(props.row[props.column.Name], props.row)
-    return textOption?.tag || ''
-  }
-  return ''
+const columnProps = computed(() => {
+  const defaultTagProps = getDefaultProps(textProps)
+  if (!props.column.propsFormatter)
+    return { ...defaultTagProps } as TextProps
+  const propsFromColumn = (props.column.propsFormatter(props.row[props.column.name], props.row) as Partial<TextProps>) || {}
+  return { ...defaultTagProps, ...propsFromColumn } as TextProps
 })
 </script>
 
 <template>
-  <div>
-    <div :class="customClass">
-      <el-col class="text" :title="cellText">
-        <el-text v-if="textTag" class="mx-1" :tag="textTag" :type="textType">
-          {{ cellText }}
-        </el-text>
-        <el-text v-else class="mx-1" :type="textType">
-          {{ cellText }}
-        </el-text>
-      </el-col>
-    </div>
-  </div>
+  <ElCol class="text" :class="customClass" :title="cellText">
+    <ElText class="mx-1" :tag="columnProps.tag" :type="columnProps.type">
+      {{ cellText }}
+    </ElText>
+  </ElCol>
 </template>
 
 <style lang="scss" scoped>

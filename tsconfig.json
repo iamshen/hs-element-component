@@ -1,5 +1,9 @@
 {
-  "files": [],
+  "compilerOptions": {
+    "types": [
+      "element-plus/global"
+    ]
+  },
   "references": [
     {
       "path": "./tsconfig.app.json"
@@ -7,5 +11,6 @@
     {
       "path": "./tsconfig.node.json"
     }
-  ]
+  ],
+  "files": []
 }

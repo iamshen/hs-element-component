@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import type { PropType } from 'vue'
 import { computed } from 'vue'
-import type { TableColumnProps } from '../types'
+import type { ColumnType, TableColumnProps } from '../types'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'STRING'>>,
     required: true,
     default: () => {},
   },
@@ -18,27 +18,27 @@ const props = defineProps({
 
 const customClass = computed(() => {
   const strClass: string[] = ['el-table-text-column']
-  if (props.column.Name === '' || props.column.Name === undefined) {
+  if (props.column.name === '' || props.column.name === undefined) {
     return strClass
   }
   if (props.column.cellClass instanceof Function) {
-    strClass.push(props.column.cellClass(props.row[props.column.Name], props.row))
+    strClass.push(props.column.cellClass(props.row[props.column.name], props.row))
   }
   return strClass.join(' ')
 })
 
 const cellText = computed(() => {
-  if (props.column.Name === '' || props.column.Name === undefined) {
+  if (props.column.name === '' || props.column.name === undefined) {
     return ''
   }
-  const res = props.row[props.column.Name]
+  const res = props.row[props.column.name]
   if (props.column.formatter) {
-    return props.column.formatter(props.row[props.column.Name], props.row)
+    return props.column.formatter(props.row[props.column.name], props.row)
   }
   if (res === null || res === undefined || res === '') {
     return '--'
   }
-  return props.row[props.column.Name]
+  return props.row[props.column.name]
 })
 const srcList = computed(() => {
   if (props.column.images) {
@@ -74,9 +74,6 @@ const srcList = computed(() => {
   display: flex;
   font-size: 13px;
   width: 100%;
-  .text {
-
-  }
   .icon-text {
     text-align: left;
     margin-left: 5px;

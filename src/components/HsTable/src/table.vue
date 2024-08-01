@@ -1,9 +1,11 @@
 <script setup  lang="ts">
-import { computed, reactive, ref } from 'vue'
-import { ElTable, ElTableColumn, } from 'element-plus'
+import { reactive, ref } from 'vue'
+import { ElEmpty, ElTable, ElTableColumn } from 'element-plus'
 import type { PageRequest } from './types'
 import HsTableColumn from './table-column.vue'
 import { tableProps } from './table'
+
+import { HsPaginator } from '~/components'
 
 defineOptions({
   name: 'HsTable',
@@ -16,29 +18,11 @@ const emit = defineEmits<{
   (event: 'handleSelect', selection: any, row: any): void
   (event: 'handleSelectAll', selection: any): void
   (event: 'handleRowClick', row: any, column: any, evt: any): void
-  (event: 'update:pageRequestModel', data: PageRequest): void
 }>()
 
 const elTableRef = ref<InstanceType<typeof ElTable>>()
 
-// eslint-disable-next-line unused-imports/no-unused-vars
-const pageIndex = computed({
-  get() {
-    return props.pageRequestModel.pageIndex
-  },
-  set(val: number) {
-    emit('update:pageRequestModel', { ...props.pageRequestModel, pageIndex: val })
-  },
-})
-// eslint-disable-next-line unused-imports/no-unused-vars
-const pageSize = computed({
-  get() {
-    return props.pageRequestModel.pageSize
-  },
-  set(val: number) {
-    emit('update:pageRequestModel', { ...props.pageRequestModel, pageSize: val })
-  },
-})
+const pageRequestModel = defineModel<PageRequest>({ required: true })
 
 function handleCommand(command: string | number | object | boolean) {
   emit('handleCommand', command)
@@ -64,13 +48,7 @@ const state = reactive({
 
 /**  */
 async function queryAsync() {
-  /** 合并 index, size 变化事件 */
-  const requestModel = {
-    ...props.pageRequestModel,
-    // ...(page && limit && { pageIndex: page, pageSize: limit }),
-  }
-
-  const result = await props.pageRequestFn(requestModel)
+  const result = await props.pageRequestFn(pageRequestModel.value)
   if (result) {
     state.dataSource = result.data ?? result
     state.total = result.totalCount
@@ -113,7 +91,7 @@ defineExpose({
       @row-click="handleRowClick"
     >
       <!-- 多选 -->
-      <el-table-column v-if="multiSelect" type="selection" />
+      <ElTableColumn v-if="multiSelect" type="selection" />
       <HsTableColumn
         v-for="(column, columnIndex) in columns"
         :key="columnIndex"
@@ -121,17 +99,17 @@ defineExpose({
         @handle-command="handleCommand"
       />
       <template #empty>
-        <el-empty :image-size="300" description="暂无数据" />
+        <ElEmpty :image-size="300" description="暂无数据" />
       </template>
     </ElTable>
-    <!-- <Pagination
+    <HsPaginator
       v-if="isPager"
       v-show="state.total >= 0"
-      v-model:page="pageIndex"
-      v-model:limit="pageSize"
+      v-model:page-index="pageRequestModel.pageIndex"
+      v-model:page-size="pageRequestModel.pageSize"
       :total="state.total"
-      @pagination="queryAsync"
-    /> -->
+      @on-change="queryAsync"
+    />
   </div>
 </template>
 

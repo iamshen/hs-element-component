@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import type { PropType } from 'vue'
 import { computed } from 'vue'
-import type { TableColumnProps } from '../types'
+import type { ColumnType, TableColumnProps } from '../types'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'SWITCH'>>,
     required: true,
     default: () => {},
   },
@@ -21,14 +21,14 @@ const emit = defineEmits<{
 }>()
 
 const cellText = computed(() => {
-  const res = props.row[props.column.Name]
+  const res = props.row[props.column.name]
   if (props.column.formatter) {
-    return props.column.formatter(props.row[props.column.Name], props.row)
+    return props.column.formatter(props.row[props.column.name], props.row)
   }
   if (res === null || res === undefined || res === '') {
     return '--'
   }
-  return props.row[props.column.Name]
+  return props.row[props.column.name]
 })
 
 function handleCommand(_command: string | number | object) {

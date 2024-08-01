@@ -5,7 +5,7 @@ import type { TableColumnProps } from '../types'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'IMAGE'>>,
     required: true,
     default: () => {},
   },
@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 const srcList = computed(() => {
-  const urls = props.row[props.column.Name]
+  const urls = props.row[props.column.name]
   if (props.column.formatter) {
     return props.column.formatter(urls, props.row)
   }
@@ -33,15 +33,7 @@ const srcList = computed(() => {
 
 <template>
   <el-col v-if="srcList.length" class="el-icon-row" :span="24">
-    <el-image
-      class="el-avatar el-avatar--small el-avatar--square"
-      :src="srcList[0]"
-      :preview-src-list="srcList"
-      :initial-index="4"
-      fit="fill"
-      :z-index="9999"
-      preview-teleported
-    />
+    <el-image class="el-avatar el-avatar--small el-avatar--square" :src="srcList[0]" :preview-src-list="srcList" :initial-index="4" fit="fill" :z-index="9999" preview-teleported />
   </el-col>
 </template>
 

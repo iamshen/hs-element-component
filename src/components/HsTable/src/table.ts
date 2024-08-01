@@ -1,7 +1,7 @@
-import type { TreeNode } from 'element-plus'
+import { type TreeNode, componentSizes } from 'element-plus'
 import type { ExtractPropTypes, PropType } from 'vue'
-import { buildProps } from 'element-plus/es/utils/index.mjs'
-import { type PageRequest, type TableColumnProps, componentSizes } from './types'
+import { buildProps } from 'element-plus/es/utils/index'
+import type { ColumnTypeKeys, PageRequest, TableColumnProps } from './types'
 
 /**
  * hs table props
@@ -12,7 +12,7 @@ export const tableProps = buildProps({
    * @description 列配置
    */
   columns: {
-    type: Array as () => TableColumnProps[],
+    type: Array as () => TableColumnProps<ColumnTypeKeys>[],
     required: true,
   },
   /**
@@ -20,21 +20,8 @@ export const tableProps = buildProps({
    * @description Table 分页请求方法
    */
   pageRequestFn: {
-    type: Function as PropType<(pageRequest: PageRequest) => Promise<any>>,
+    type: Function as PropType<(pageRequest: PageRequest | undefined) => Promise<any>>,
     required: true,
-  },
-  /**
-   * 请求模型
-   * @description Table 分页请求模型
-   */
-  pageRequestModel: {
-    type: Object as PropType<PageRequest>,
-    required: true,
-    default: () => ({
-      pageIndex: 1,
-      pageSize: 15,
-      keyword: '',
-    }),
   },
   /**
    * 是否为斑马纹 table

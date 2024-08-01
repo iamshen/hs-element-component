@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import type { PropType } from 'vue'
 import { computed } from 'vue'
+import type { LinkProps } from 'element-plus'
+import { ElLink, linkProps } from 'element-plus'
 import type { TableColumnProps } from '../types'
+import { getDefaultProps } from './utils'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'LINK'>>,
     required: true,
     default: () => {},
   },
@@ -16,13 +19,8 @@ const props = defineProps({
   },
 })
 
-const isHyperlink = computed(() => {
-  const href = props.row[props.column.Name]
-  return !!(href && !href.startsWith('http'))
-})
-
 const cellText = computed(() => {
-  const textValue = props.row[props.column.Name]
+  const textValue = props.row[props.column.name]
   // console.log(props.row, props.column.propertyName, res)
   if (textValue === null || textValue === undefined || textValue === '') {
     return '--'
@@ -30,29 +28,23 @@ const cellText = computed(() => {
   if (props.column.title) {
     return props.column.title instanceof Function ? props.column.title(props.row) : props.column.title
   }
-  return props.row[props.column.Name]
+  return props.row[props.column.name]
 })
 
-const linkRoute = computed(() => {
-  return props.column.formatter!(props.row[props.column.Name], props.row)
+const columnProps = computed(() => {
+  const defaultTagProps = getDefaultProps(linkProps)
+  if (!props.column.propsFormatter)
+    return { ...defaultTagProps } as LinkProps
+  const propsFromColumn = props.column.propsFormatter(props.row[props.column.name], props.row) as Partial<LinkProps> || {}
+  return { ...defaultTagProps, ...propsFromColumn } as LinkProps
 })
 </script>
 
 <template>
   <div class="el-table-text-column">
-    <template v-if="props.column.formatter">
-      <router-link
-        v-if="isHyperlink" class="el-link el-link--primary is-underline"
-        :title="cellText"
-        :to="linkRoute"
-        replace
-      >
-        {{ cellText }}
-      </router-link>
-      <el-link v-else :href="linkRoute || ''" :title="cellText" target="_blank" type="primary">
-        {{ cellText }}
-      </el-link>
-    </template>
+    <ElLink :href="columnProps.href" :target="columnProps.target" :type="columnProps.type" :icon="columnProps.icon" :underline="columnProps.underline" :disabled="columnProps.disabled">
+      {{ cellText }}
+    </ElLink>
   </div>
 </template>
 

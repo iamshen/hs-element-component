@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import type { PropType } from 'vue'
 import { computed } from 'vue'
-import type { TableColumnProps } from '../types'
+import type { ColumnType, TableColumnProps } from '../types'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'TIMESTAMP'>>,
     required: true,
     default: () => {},
   },
@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 const cellText = computed(() => {
-  const value = props.row[props.column.Name]
+  const value = props.row[props.column.name]
   if (value === null || value === undefined || value === '') {
     return '--'
   }

@@ -1,5 +1,6 @@
 import type { RendererElement, RendererNode, VNode } from 'vue'
 import type * as ElpIcon from '@element-plus/icons-vue'
+import type { LinkProps, TagProps, TextProps } from 'element-plus'
 
 /**
  * 定义图标类型
@@ -7,20 +8,71 @@ import type * as ElpIcon from '@element-plus/icons-vue'
 type ElPlusIcon = keyof typeof ElpIcon
 
 /**
+ * 表格列的字段类型
+ */
+export enum ColumnType {
+  /** 字符串，无交互，默认样式 */
+  STRING = 'string',
+  /** 时间戳 */
+  TIMESTAMP = 'timestamp',
+  /** 图片 */
+  IMAGE = 'image',
+  /** 操作 */
+  ACTION = 'action',
+  /** 链接 */
+  LINK = 'link',
+  /** tag 标签 */
+  TAG = 'tag',
+  /** 动态 */
+  DYNAMIC = 'dynamic',
+  /** 开关 */
+  SWITCH = 'switch',
+  /** 嵌套 */
+  NESTED = 'nested',
+  /** text 文本 */
+  TEXT = 'text',
+}
+
+// 定义 columnType 的泛型
+export type ColumnTypeKeys = keyof typeof ColumnType
+
+/**
+ * 各个列类型对应的 props 类型
+ */
+interface ColumnPropsMap {
+  [ColumnType.STRING]: never
+  [ColumnType.TIMESTAMP]: never
+  [ColumnType.IMAGE]: never
+  [ColumnType.ACTION]: never
+  [ColumnType.LINK]: Partial<LinkProps>
+  [ColumnType.TAG]: Partial<TagProps>
+  [ColumnType.DYNAMIC]: never
+  [ColumnType.SWITCH]: never
+  [ColumnType.NESTED]: never
+  [ColumnType.TEXT]: Partial<TextProps>
+}
+
+/**
+ * 根据 columnType 提取对应的 columnProps 类型
+ */
+type ColumnPropsForType<T extends ColumnTypeKeys> = {
+  [K in T]: ColumnPropsMap[typeof ColumnType[K]]
+}[T]
+/**
  * 表格列配置
  */
-export interface TableColumnProps {
+export interface TableColumnProps<T extends ColumnTypeKeys> {
   /**
    * 字段名称
    * @description 字段名称
    */
-  Name: string
+  name: string
 
   /**
    * 字段类型
    * @description 字段类型
    */
-  PropertyType?: keyof typeof ColumnPropsType | ColumnPropsType
+  columnType?: T
 
   /**
    * 显示的标题
@@ -71,13 +123,18 @@ export interface TableColumnProps {
    * 操作按钮
    * @description 操作按钮配置，可以是一个数组或者一个函数
    */
-  actions?: ColumnPropsAction[] | ((row: any) => ColumnPropsAction[])
+  actions?: ColumnAction[] | ((row: any) => ColumnAction[])
 
   /**
    * 格式化器，用来格式化内容
    * @description 格式化字段的方法，是一个函数
    */
   formatter?: (value: any, row: any) => VNode<RendererNode, RendererElement, { [key: string]: any }> | string | null
+
+  /**
+   * 列的 props
+   */
+  propsFormatter?: (value: any, row: any) => ColumnPropsForType<T>
 
   /**
    * 单元格字体样式
@@ -101,7 +158,7 @@ export interface TableColumnProps {
    * 多级表头
    * @description 数据结构比较复杂的时候，可使用多级表头来展现数据的层次关系。
    */
-  children?: TableColumnProps[]
+  children?: TableColumnProps<T>[]
 
   /**
    * 对应列是否可以通过拖动改变宽度
@@ -126,57 +183,56 @@ export interface TableColumnProps {
    * @description true 表示固定在左侧
    */
   fixed?: boolean | 'left' | 'right'
-}
 
-/**
- * 表格列的字段类型
- */
-export enum ColumnPropsType {
-  /** 字符串，无交互，默认样式 */
-  STRING = 'string',
-  /** 时间戳 */
-  TIMESTAMP = 'timestamp',
-  /** 图片 */
-  IMAGE = 'image',
-  /** 操作 */
-  ACTION = 'action',
-  /** 链接 */
-  LINK = 'link',
-  /** tag 标签 */
-  TAG = 'tag',
-  /** 动态 */
-  DYNAMIC = 'dynamic',
-  /** 开关 */
-  SWITCH = 'switch',
-  /** 嵌套 */
-  NESTED = 'nested',
-  /** text 文本 */
-  TEXT = 'text',
 }
 
 /**
  * 操作按钮
+ *
+ * 组件行为说明：
+ * - 当定义 `ColumnAction` 时，如果 `dynamicComponent` 被指定（即不为 `null` 或 `undefined`），
+ *   则点击操作按钮将直接执行指定的动态组件或函数。
+ * - 如果未定义 `dynamicComponent`，则点击操作按钮会查询当前目录（引用位置的相对路径）的
+ *   `/components` 目录下查找与 `name` 属性匹配的 `name.vue` 文件，并将其作为执行组件进行渲染。
  */
-export interface ColumnPropsAction {
+export interface ColumnAction {
 
   /**
    * 操作按钮名称
-   * @description 操作按钮名称
+   * @description 指定操作按钮的显示名称。此名称将用于按钮的文本或标签。
    */
   name: string
 
   /**
    * 操作按钮图标
-   * @description 操作按钮图标
+   * @description 指定操作按钮的图标。可以使用 Element Plus 提供的图标（`ElPlusIcon`），以便在按钮上显示相应的图标。
    */
-  icon?: ElPlusIcon // | keyof typeof ElpIcon
+  icon?: ElPlusIcon
 
   /**
    * 操作按钮命令
-   * @description 操作按钮命令
+   * @description 该字段定义了按钮的操作命令，通常用于识别或处理按钮的操作逻辑。
    */
   command: string
 
+  /**
+   * 操作按钮触发的动态组件或函数
+   * @description 当指定此字段时，点击操作按钮将执行动态组件或函数。
+   * - 如果为 `VNode` 类型，按钮点击时将渲染指定的动态组件。
+   * - 如果为函数类型，按钮点击时将执行该函数。
+   * - 如果为 `null` 或 `undefined`，则按钮将按照默认逻辑处理。
+   */
+  dynamicComponent?: VNode | (() => void) | undefined
+}
+
+/**
+ * Table 行命名对象
+ */
+export interface RowCommand {
+  name: string | undefined
+  row: any | undefined
+  key?: number
+  dynamicComponent?: VNode | (() => void) | undefined
 }
 
 /**
@@ -218,12 +274,4 @@ export interface ResponseResult {
   traceId?: string
   version?: string
   [property: string]: any
-}
-
-export const componentSizes = ['', 'default', 'small', 'large'] as const
-
-export interface RowCommand {
-  name: string | null
-  row: any | null
-  key?: number
 }

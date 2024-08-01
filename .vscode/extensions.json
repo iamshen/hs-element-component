@@ -3,12 +3,10 @@
     "antfu.browse-lite",
     "antfu.unocss",
     "antfu.vite",
-
     "Vue.volar",
     "dbaeumer.vscode-eslint",
     "usernamehw.errorlens",
     "streetsidesoftware.code-spell-checker",
-
     "eamodio.gitlens",
     "EditorConfig.EditorConfig",
     "johnsoncodehk.vscode-tsconfig-helper"

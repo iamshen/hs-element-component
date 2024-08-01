@@ -1,7 +1,8 @@
 <script lang="ts" setup>
+import { ElTableColumn, ElTooltip } from 'element-plus'
 import type { PropType } from 'vue'
 import { compNameRef } from './table-column'
-import type { TableColumnProps } from './types'
+import type { ColumnTypeKeys, TableColumnProps } from './types'
 
 defineOptions({
   name: 'HsTableColumn',
@@ -9,9 +10,9 @@ defineOptions({
 
 defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<ColumnTypeKeys>>,
     required: true,
-    default: () => {},
+    default: () => ({} as TableColumnProps<ColumnTypeKeys>),
   },
 })
 
@@ -45,10 +46,10 @@ function getTitle(row: Record<string, any>, propertyName: string, title?: ((row:
 
 <template>
   <!-- 嵌套表头（多级表头） -->
-  <el-table-column
+  <ElTableColumn
     v-if="column.children"
     :class-name="column.className"
-    :prop="column.Name"
+    :prop="column.name"
     :resizable="column.resizable || false"
     :min-width="column.minWidth"
     :width="column.width"
@@ -62,13 +63,13 @@ function getTitle(row: Record<string, any>, propertyName: string, title?: ((row:
       :column="childrenColumn"
       @handle-command="handleCommand"
     />
-  </el-table-column>
+  </ElTableColumn>
   <!-- 正常单表头 -->
-  <el-table-column
+  <ElTableColumn
     v-else
     :class-name="column.className"
     :fixed="column.fixed || false"
-    :prop="column.Name"
+    :prop="column.name"
     :resizable="column.resizable || false"
     :min-width="column.minWidth"
     :width="column.width"
@@ -81,23 +82,23 @@ function getTitle(row: Record<string, any>, propertyName: string, title?: ((row:
     </template>
     <template #default="{ row }">
       <template v-if="column.title">
-        <el-tooltip
+        <ElTooltip
           class="box-item"
           effect="dark"
           placement="top"
-          :content="getTitle(row, column.Name!, column.title)"
+          :content="getTitle(row, column.name!, column.title)"
         >
           <component
-            :is="compNameRef(column.PropertyType)"
+            :is="compNameRef(column.columnType)"
             :column="column"
             :row="row"
             @handle-command="handleCommand"
           />
-        </el-tooltip>
+        </ElTooltip>
       </template>
       <template v-else>
-        <component :is="compNameRef(column.PropertyType)" :column="column" :row="row" @handle-command="handleCommand" />
+        <component :is="compNameRef(column.columnType)" :column="column" :row="row" @handle-command="handleCommand" />
       </template>
     </template>
-  </el-table-column>
+  </ElTableColumn>
 </template>

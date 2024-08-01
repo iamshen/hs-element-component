@@ -1,8 +1,9 @@
 import { withInstall } from 'element-plus/es/utils/vue/install'
-import table from './src/table.vue'
+import Table from './src/table.vue'
 
-export const HsTable = withInstall(table)
-
+export const HsTable = withInstall(Table)
 export default HsTable
 
-export type HsTableInstance = InstanceType<typeof table>
+export * from './src/types'
+
+export type HsTableInstance = InstanceType<typeof Table>

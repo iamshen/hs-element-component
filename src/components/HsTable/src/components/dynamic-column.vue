@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import type { PropType } from 'vue'
 import { computed } from 'vue'
+import { ElTooltip } from 'element-plus'
 import type { TableColumnProps } from '../types'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'DYNAMIC'>>,
     required: true,
     default: () => {},
   },
@@ -19,7 +20,7 @@ const props = defineProps({
 const dyncComponent = computed(() => {
   let template: any
   if (props.column.formatter) {
-    template = props.column.formatter(props.row[props.column.Name], props.row) || ''
+    template = props.column.formatter(props.row[props.column.name], props.row) || ''
   }
   return {
     template,
@@ -32,8 +33,8 @@ const dyncComponent = computed(() => {
 </script>
 
 <template>
-  <el-tooltip v-if="dyncComponent.tip" class="box-item" effect="dark" :content="dyncComponent.tip" placement="top">
+  <ElTooltip v-if="dyncComponent.tip" class="box-item" effect="dark" :content="dyncComponent.tip" placement="top">
     <component :is="dyncComponent.template" v-bind="$props" :data="dyncComponent.props.data" />
-  </el-tooltip>
+  </ElTooltip>
   <component :is="dyncComponent.template" v-else v-bind="$props" :data="dyncComponent.props.data" />
 </template>

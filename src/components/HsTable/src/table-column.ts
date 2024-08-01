@@ -7,28 +7,28 @@ import TagColumn from './components/tag-column.vue'
 import DyncColumn from './components/dynamic-column.vue'
 import SwitchColumn from './components/switch-column.vue'
 import TextColumn from './components/text-column.vue'
-import { ColumnPropsType } from './types'
+import { ColumnType } from './types'
 
 const TablePropsTypeMap = Object.freeze({
-  [ColumnPropsType.STRING]: StringColumn,
-  [ColumnPropsType.TIMESTAMP]: TimeStampColumn,
-  [ColumnPropsType.IMAGE]: ImageColumn,
-  [ColumnPropsType.LINK]: LinkColumn,
-  [ColumnPropsType.TAG]: TagColumn,
-  [ColumnPropsType.TEXT]: TextColumn,
-  [ColumnPropsType.DYNAMIC]: DyncColumn,
-  [ColumnPropsType.ACTION]: ActionColumn,
-  [ColumnPropsType.SWITCH]: SwitchColumn,
+  [ColumnType.STRING]: StringColumn,
+  [ColumnType.TIMESTAMP]: TimeStampColumn,
+  [ColumnType.IMAGE]: ImageColumn,
+  [ColumnType.LINK]: LinkColumn,
+  [ColumnType.TAG]: TagColumn,
+  [ColumnType.TEXT]: TextColumn,
+  [ColumnType.DYNAMIC]: DyncColumn,
+  [ColumnType.ACTION]: ActionColumn,
+  [ColumnType.SWITCH]: SwitchColumn,
 })
 
-function compNameRef(tablePropsType: ColumnPropsType | keyof typeof ColumnPropsType = ColumnPropsType.STRING) {
+function compNameRef(tablePropsType: ColumnType | keyof typeof ColumnType = ColumnType.STRING) {
   if (tablePropsType === null)
-    tablePropsType = ColumnPropsType.STRING
+    tablePropsType = ColumnType.STRING
   if (typeof tablePropsType === 'string') {
-    const enumKey = ColumnPropsType[tablePropsType as keyof typeof ColumnPropsType]
-    return (TablePropsTypeMap as Record<ColumnPropsType, any>)[enumKey]
+    const enumKey = ColumnType[tablePropsType as keyof typeof ColumnType]
+    return (TablePropsTypeMap as Record<ColumnType, any>)[enumKey]
   }
-  return (TablePropsTypeMap as Record<ColumnPropsType, any>)[tablePropsType]
+  return (TablePropsTypeMap as Record<ColumnType, any>)[tablePropsType]
 }
 
 export { compNameRef }

@@ -1,11 +1,12 @@
 <script lang="ts" setup>
+import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus'
 import * as ElpIcon from '@element-plus/icons-vue'
 import type { PropType } from 'vue'
-import type { ColumnPropsAction, TableColumnProps } from '../types'
+import type { ColumnAction, TableColumnProps } from '../types'
 
 const props = defineProps({
   column: {
-    type: Object as PropType<TableColumnProps>,
+    type: Object as PropType<TableColumnProps<'ACTION'>>,
     required: true,
   },
   row: {
@@ -18,10 +19,8 @@ const emit = defineEmits<{
   (event: 'handleCommand', command: string | number | object | boolean): void
 }>()
 
-function actions(row: Record<string, any>): ColumnPropsAction[] {
-  return typeof props.column.actions === 'function'
-    ? props.column.actions(row)
-    : props.column.actions || []
+function actions(row: Record<string, any>): ColumnAction[] {
+  return typeof props.column.actions === 'function' ? props.column.actions(row) : props.column.actions || []
 }
 
 function handleCommand(command: string | number | object | boolean) {
@@ -31,26 +30,22 @@ function handleCommand(command: string | number | object | boolean) {
 
 <template>
   <span class="flex">
-    <el-dropdown trigger="click" @command="handleCommand">
+    <ElDropdown trigger="click" @command="handleCommand">
       <!-- 操作 -->
-      <el-icon :size="18" class="el-icon--right">
+      <ElIcon :size="18" class="el-icon--right">
         <component :is="ElpIcon.Setting" />
-      </el-icon>
+      </ElIcon>
       <template #dropdown>
-        <el-dropdown-menu>
+        <ElDropdownMenu>
           <template v-for="(item, index) in actions(row)" :key="index">
-            <el-dropdown-item
-              v-if="item.icon"
-              :icon="ElpIcon[item.icon]"
-              :command="{ item: row, command: item.command }"
-            >
+            <ElDropdownItem v-if="item.icon" :icon="ElpIcon[item.icon]" :command="{ row, name: item.command, dynamicComponent: item.dynamicComponent }">
               {{ item.name }}
-            </el-dropdown-item>
-            <el-dropdown-item v-else :command="{ item: row, command: item.command }">{{ item.name }}</el-dropdown-item>
+            </ElDropdownItem>
+            <ElDropdownItem v-else :command="{ row, name: item.command, dynamicComponent: item.dynamicComponent }">{{ item.name }}</ElDropdownItem>
           </template>
-        </el-dropdown-menu>
+        </ElDropdownMenu>
       </template>
-    </el-dropdown>
+    </ElDropdown>
   </span>
 </template>
 
